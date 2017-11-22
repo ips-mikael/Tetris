@@ -17,46 +17,65 @@ import java.util.Vector;
 
 public class TetrisObjectCreator {
 
-    private static int mapZ[] = {0, 0, 0,
-                                 0, 1, 1,
-                                 1, 1, 0};
-    private static int mapS[] = {0, 0, 0,
-                                 1, 1, 0,
-                                 0, 1, 1};
-    private static int mapJ[] = {0, 1, 0,
-                                 0, 1, 0,
-                                 1, 1, 0};
-    private static int mapL[] = {0, 1, 0,
-                                 0, 1, 0,
-                                 0, 1, 1};
-    private static int mapT[] = {0, 0, 0,
-                                 0, 1, 0,
-                                 1, 1, 1};
-    private static int mapO[] = {1, 1,
-                                 1, 1};
-    private static int mapI[] = {0, 1, 0, 0,
-                                 0, 1, 0, 0,
-                                 0, 1, 0, 0,
-                                 0, 1, 0, 0};
+    private static int mapZ[][] = {{0, 0, 0,
+                                    0, 1, 1,
+                                    1, 1, 0},
+                                   {1, 0, 0,
+                                    1, 1, 0,
+                                    0, 1, 0}};
+    private static int mapS[][] = {{0, 0, 0,
+                                    1, 1, 0,
+                                    0, 1, 1},
+                                   {0, 1, 0,
+                                    1, 1, 0,
+                                    1, 0, 0}};
+    private static int mapJ[][] = {{0, 1, 0,
+                                    0, 1, 0,
+                                    1, 1, 0},
+                                   {1, 0, 0,
+                                    1, 1, 1,
+                                    0, 0, 0},
+                                   {1, 1, 0,
+                                    1, 0, 0,
+                                    1, 0, 0},
+                                   {1, 1, 1,
+                                    0, 0, 1,
+                                    0, 0, 0}};
+    private static int mapL[][] = {{0, 1, 0,
+                                    0, 1, 0,
+                                    0, 1, 1},
+                                   {1, 1, 1,
+                                    1, 0, 0,
+                                    0, 0, 0},
+                                   {0, 1, 1,
+                                    0, 0, 1,
+                                    0, 0, 1},
+                                   {0, 0, 1,
+                                    1, 1, 1,
+                                    0, 0, 0}};
+    private static int mapT[][] = {{0, 0, 0,
+                                    0, 1, 0,
+                                    1, 1, 1},
+                                   {0, 1, 0,
+                                    0, 1, 1,
+                                    0, 1, 0},
+                                   {0, 0, 0,
+                                    1, 1, 1,
+                                    0, 1, 0},
+                                   {0, 0, 1,
+                                    0, 1, 1,
+                                    0, 0, 1}};
+    private static int mapO[][] = {{1, 1,
+                                    1, 1}};
+    private static int mapI[][] = {{0, 1, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 1, 0, 0,
+                                    0, 1, 0, 0},
+                                   {0, 0, 0, 0,
+                                    1, 1, 1, 1,
+                                    0, 0, 0, 0,
+                                    0, 0, 0, 0}};
 
-    private static int rotateRightMap2x2[] = {1, 3,
-                                              0, 2};
-    private static int rotateLeftMap2x2[] = {2, 0,
-                                             3, 1};
-    private static int rotateRightMap3x3[] = {2, 5, 8,
-                                              1, 4, 7,
-                                              0, 3, 6};
-    private static int rotateLeftMap3x3[] = {6, 3, 0,
-                                             7, 4, 1,
-                                             8, 5, 2};
-    private static int rotateRightMap4x4[] = {3, 7, 11, 15,
-                                              2, 6, 10, 14,
-                                              1, 5,  9, 13,
-                                              0, 4,  8, 12};
-    private static int rotateLeftMap4x4[] = {12,  8, 4, 0,
-                                             13,  9, 5, 1,
-                                             14, 10, 6, 2,
-                                             15, 11, 7, 3};
     private static TetrisObjectCreator instance = null;
 
     private TetrisObjectCreator() {
@@ -70,18 +89,15 @@ public class TetrisObjectCreator {
     }
 
     class TetrisComponent {
-        int index;
         Rect bounds;
         Paint paint;
 
         public TetrisComponent(int index, int color) {
-            this.index = index;
             bounds = new Rect();
             paint = new Paint();
             paint.setColor(color);
         }
         public TetrisComponent(TetrisComponent src) {
-            index = src.index;
             bounds = new Rect(src.bounds);
             paint = new Paint(src.paint);
         }
@@ -95,8 +111,8 @@ public class TetrisObjectCreator {
 
     class TetrisObject {
         Vector<TetrisComponent> tetrisComponents;
-        int rotateLeftMap[];
-        int rotateRightMap[];
+        int rotationMap[][];
+        int rotationIndex = 0;
         int size;
         int velocity;
         Point origin;
@@ -121,8 +137,8 @@ public class TetrisObjectCreator {
                 TetrisComponent newTetrisComponent = new TetrisComponent(tetrisComponent);
                 tetrisComponents.add(newTetrisComponent);
             }
-            rotateLeftMap = src.rotateLeftMap;
-            rotateRightMap = src.rotateRightMap;
+            rotationMap = src.rotationMap;
+            rotationIndex = src.rotationIndex;
             size = src.size;
             velocity = src.velocity;
             origin = new Point(src.origin);
@@ -142,8 +158,7 @@ public class TetrisObjectCreator {
                 tetrisObject.bounds = new Rect(tetrisComponent.bounds);
                 tetrisObject.origin = new Point(bounds.left, bounds.top);
                 tetrisObject.size = 1;
-                tetrisObject.rotateLeftMap = new int[1];
-                tetrisObject.rotateRightMap = new int[1];
+                tetrisObject.rotationMap = new int[1][1];
                 splitVector.add(tetrisObject);
             }
             TetrisObject[] a = new TetrisObject[splitVector.size()];
@@ -164,26 +179,31 @@ public class TetrisObjectCreator {
             offset(TetrisUtils.getInstance().getBlockSize(), 0);
         }
         public void rotateLeft() {
-            rotate(rotateLeftMap);
+            rotationIndex--;
+            if (rotationIndex < 0) {
+                rotationIndex = rotationMap.length - 1;
+            }
+            rotate(rotationMap[rotationIndex]);
         }
         public void rotateRight() {
-            rotate(rotateRightMap);
+            rotationIndex = (rotationIndex + 1) % rotationMap.length;
+            rotate(rotationMap[rotationIndex]);
         }
         private void rotate(int rotateMap[]) {
             Rect newBounds = new Rect();
             Iterator it = tetrisComponents.iterator();
-            while (it.hasNext()) {
-                TetrisComponent tetrisComponent = (TetrisComponent)it.next();
-                int newIndex = rotateMap[tetrisComponent.index];
-                int r = newIndex / size;
-                int c = newIndex % size;
-                int y = r * TetrisUtils.getInstance().getBlockSize() + origin.y;
-                int x = c * TetrisUtils.getInstance().getBlockSize() + origin.x;
-
-                tetrisComponent.bounds.offsetTo(x, y);
-                tetrisComponent.index = newIndex;
-                newBounds.union(tetrisComponent.bounds);
+            for (int i = 0; i < rotateMap.length; i++) {
+                if (rotateMap[i] == 1) {
+                    int r = i / size;
+                    int c = i % size;
+                    int y = r * TetrisUtils.getInstance().getBlockSize() + origin.y;
+                    int x = c * TetrisUtils.getInstance().getBlockSize() + origin.x;
+                    TetrisComponent tetrisComponent = (TetrisComponent)it.next();
+                    tetrisComponent.bounds.offsetTo(x, y);
+                    newBounds.union(tetrisComponent.bounds);
+                }
             }
+
             bounds = newBounds;
         }
         public void offset(int dx, int dy) {
@@ -282,63 +302,56 @@ public class TetrisObjectCreator {
     private TetrisObject makeTetrisObjectZ() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 3;
-        tetrisObject.rotateLeftMap = rotateLeftMap3x3;
-        tetrisObject.rotateRightMap = rotateRightMap3x3;
-        addComponents(tetrisObject, mapZ, Color.RED);
+        tetrisObject.rotationMap = mapZ;
+        addComponents(tetrisObject, mapZ[0], Color.RED);
         return tetrisObject;
     }
 
     private TetrisObject makeTetrisObjectS() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 3;
-        tetrisObject.rotateLeftMap = rotateLeftMap3x3;
-        tetrisObject.rotateRightMap = rotateRightMap3x3;
-        addComponents(tetrisObject, mapS, Color.GREEN);
+        tetrisObject.rotationMap = mapS;
+        addComponents(tetrisObject, mapS[0], Color.GREEN);
         return tetrisObject;
     }
 
     private TetrisObject makeTetrisObjectJ() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 3;
-        tetrisObject.rotateLeftMap = rotateLeftMap3x3;
-        tetrisObject.rotateRightMap = rotateRightMap3x3;
-        addComponents(tetrisObject, mapJ, Color.BLUE);
+        tetrisObject.rotationMap = mapJ;
+        addComponents(tetrisObject, mapJ[0], Color.BLUE);
         return tetrisObject;
     }
 
     private TetrisObject makeTetrisObjectL() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 3;
-        tetrisObject.rotateLeftMap = rotateLeftMap3x3;
-        tetrisObject.rotateRightMap = rotateRightMap3x3;
-        addComponents(tetrisObject, mapL, 0xFFFFA500); // Orange
+        tetrisObject.rotationMap = mapL;
+        addComponents(tetrisObject, mapL[0], 0xFFFFA500); // Orange
         return tetrisObject;
     }
 
     private TetrisObject makeTetrisObjectO() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 2;
-        tetrisObject.rotateLeftMap = rotateLeftMap2x2;
-        tetrisObject.rotateRightMap = rotateRightMap2x2;
-        addComponents(tetrisObject, mapO, Color.YELLOW);
+        tetrisObject.rotationMap = mapO;
+        addComponents(tetrisObject, mapO[0], Color.YELLOW);
         return tetrisObject;
     }
 
     private TetrisObject makeTetrisObjectT() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 3;
-        tetrisObject.rotateLeftMap = rotateLeftMap3x3;
-        tetrisObject.rotateRightMap = rotateRightMap3x3;
-        addComponents(tetrisObject, mapT, 0xFFA020F0); // Purple
+        tetrisObject.rotationMap = mapT;
+        addComponents(tetrisObject, mapT[0], 0xFFA020F0); // Purple
         return tetrisObject;
     }
 
     private TetrisObject makeTetrisObjectI() {
         TetrisObject tetrisObject = new TetrisObject();
         tetrisObject.size = 4;
-        tetrisObject.rotateLeftMap = rotateLeftMap4x4;
-        tetrisObject.rotateRightMap = rotateRightMap4x4;
-        addComponents(tetrisObject, mapI, Color.CYAN);
+        tetrisObject.rotationMap = mapI;
+        addComponents(tetrisObject, mapI[0], Color.CYAN);
         return tetrisObject;
     }
 
