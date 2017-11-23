@@ -11,7 +11,7 @@ import java.util.Vector;
 
 public class TetrisPhysicsWorld {
     Vector<TetrisObjectCreator.TetrisObject> children =
-            new Vector<TetrisObjectCreator.TetrisObject>();
+            new Vector<>();
     Rect boarder = null;
     ContactDelegate contactDelegate = null;
 
@@ -50,7 +50,7 @@ public class TetrisPhysicsWorld {
                 tetrisObject.moveTo(clone.origin.x, clone.origin.y);
                 contactDelegate.contactStarted(tetrisObject);
             }
-            else {
+            else if (dy != 0) {
                 tetrisObject.offset(0, dy);
             }
         }

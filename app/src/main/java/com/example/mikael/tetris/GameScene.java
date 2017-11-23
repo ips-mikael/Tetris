@@ -35,7 +35,7 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
     private TetrisObjectCreator.TetrisObject user;
     private TetrisPhysicsWorld world = new TetrisPhysicsWorld();
     private enum GameStates {
-        INTERACTIVE, USER_TOUCH_DOWN
+        INTERACTIVE, CONTACT_STARTED, USER_TOUCH_DOWN
     }
     private GameStates gameState = GameStates.INTERACTIVE;
     private int score = 0;
@@ -62,7 +62,7 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
         GameGestureRecognizer listener = new GameGestureRecognizer(this);
         gestureDetector = new GestureDetector(getContext(), listener);
         paint = new Paint();
-        userEvents = new LinkedList<UserEventCreator.UserEvent>();
+        userEvents = new LinkedList<>();
     }
 
     @Override
@@ -103,15 +103,15 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
     }
 
     public void update() {
+        handleUserEvent();
         handleGameState();
         world.update();
-        handleUserEvent();
     }
 
     private void makeUser() {
         user = TetrisObjectCreator.getInstance().makeTetrisObject();
-
-        int col = 0;//(-user.size + TetrisUtils.TETRIS_NO_OF_COLS) / 2;
+        user.velocity = 10;
+        int col = (-user.size + TetrisUtils.TETRIS_NO_OF_COLS) / 2;
         int x = col * TetrisUtils.getInstance().getBlockSize() + TetrisUtils.getInstance().getGameRect().left;
         user.moveTo(x, 0);
         world.addChild(user);
@@ -126,12 +126,12 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
     }
 
     public void handleUserEvent() {
-        boolean userChanged = false;
+        boolean userChanged = true;
         if (maxNoOfUserEvents < userEvents.size()) {
             maxNoOfUserEvents = userEvents.size();
             Log.d("maxNoOfUserEvents", "" + maxNoOfUserEvents);
         }
-        UserEventCreator.UserEvent e = (UserEventCreator.UserEvent) userEvents.poll();
+        UserEventCreator.UserEvent e = userEvents.poll();
         if (e != null) {
             switch (e.type) {
                 case VERTICAL_SCROLL:
@@ -142,28 +142,24 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
                     user.moveLeft();
                     if (world.isCollision(user)) {
                         user.moveRight();
-                        userChanged = true;
                     }
                     break;
                 case MOVE_RIGHT:
                     user.moveRight();
                     if (world.isCollision(user)) {
                         user.moveLeft();
-                        userChanged = true;
                     }
                     break;
                 case ROTATE_LEFT:
                     user.rotateLeft();
                     if (world.isCollision(user)) {
                         user.rotateRight();
-                        userChanged = true;
                     }
                     break;
                 case ROTATE_RIGHT:
                     user.rotateRight();
                     if (world.isCollision(user)) {
                         user.rotateLeft();
-                        userChanged = true;
                     }
                     break;
                 case DROP:
@@ -172,11 +168,6 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
                         user.velocity = 30;
                     }
                     break;
-            }
-        }
-        if (userChanged) {
-            if (gameState == GameStates.USER_TOUCH_DOWN) {
-                gameState = GameStates.INTERACTIVE;
             }
         }
     }
@@ -201,12 +192,7 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
             while (it.hasNext()) {
                 TetrisObjectCreator.TetrisObject tetrisObject =
                         (TetrisObjectCreator.TetrisObject) it.next();
-                if (tetrisObject.needsRedraw) {
-                    tetrisObject.draw(canvas);
-                }
-                else {
-                    Log.d("Redraw", "FALSE");
-                }
+                tetrisObject.draw(canvas);
             }
 
             Paint boarderPaint = new Paint();
@@ -319,7 +305,13 @@ public class GameScene extends SurfaceView implements TetrisPhysicsWorld.Contact
 
     public void contactStarted(TetrisObjectCreator.TetrisObject tetrisObject) {
         if (user == tetrisObject) {
-            gameState = GameStates.USER_TOUCH_DOWN;
+
+            if (gameState == GameStates.CONTACT_STARTED) {
+                gameState = GameStates.USER_TOUCH_DOWN;
+            }
+            else {
+                gameState = GameStates.CONTACT_STARTED;
+            }
         }
     }
 }
